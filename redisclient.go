@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	redis "github.com/go-redis/redis/v8"
-	"github.com/toransahu/go-utils"
+	"github.com/toransahu/goutils"
 )
 
 var ctx = context.Background()
