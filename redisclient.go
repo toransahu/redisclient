@@ -11,13 +11,20 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 
 	redis "github.com/go-redis/redis/v8"
-	"github.com/toransahu/goutils"
+	utils "github.com/toransahu/goutils"
 )
 
 var ctx = context.Background()
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 
 func NewConnection(host string) *redis.Client {
 	opt, err := redis.ParseURL(host)
@@ -43,7 +50,7 @@ func publish(conn *redis.Client, channels []string) {
 	pipe.Close()
 }
 
-func main() {
+func publishTestDataCLI() {
 	host := flag.String("host", "redis://localhost:6379/0", "Redis Hostname like: redis://localhost:6379/0")
 	channels_file := flag.String("channels-file", "", "Channels file")
 	flag.Parse()
@@ -59,4 +66,25 @@ func main() {
 	for {
 		publish(conn, channels)
 	}
+}
+
+func tryReadBytesFromRedisAndWriteFile() {
+	host := "redis://localhost:6379/0"
+	conn := NewConnection(host)
+
+	val, err := conn.Get(ctx, "file_bytes").Result()
+	check(err)
+	fmt.Println("file_bytes", val)
+
+	f, err := os.Create("/home/toransahu/Desktop/gocreated.jpg")
+	check(err)
+	noOfBytes, err := f.Write([]byte(val))
+	check(err)
+	fmt.Printf("wrote %d bytes\n", noOfBytes)
+	f.Sync()
+}
+
+func main() {
+	// publishTestDataCLI()
+	tryReadBytesFromRedisAndWriteFile()
 }
